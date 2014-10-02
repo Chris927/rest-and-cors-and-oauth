@@ -9,19 +9,23 @@ server.use(restifyValidator);
 var items = {};
 var lastId = 0;
 
+function decorateItemWithMediaLinks(item) {
+  return {
+    who: item.who,
+    title: item.title,
+    uri: item.uri,
+    links: {
+      'delete': server.router.render('items.delete', { id: item.id }),
+      'get': server.router.render('items.get', { id: item.id })
+    }
+  };
+}
+
 server.get({ name: 'items', path: '/history/:me' }, function(req, res, next) {
   var itemsAsArray = [];
   for (var i in items) {
     var item = items[i];
-    var itemWithLinks = {
-      who: item.who,
-      title: item.title,
-      uri: item.uri,
-      links: {
-        'delete': server.router.render('items.delete', { id: item.id })
-      }
-    };
-    itemsAsArray.push(itemWithLinks);
+    itemsAsArray.push(decorateItemWithMediaLinks(item));
   }
   res.send({
     items: itemsAsArray,
@@ -44,13 +48,22 @@ server.post({ name: 'items.add', path: '/items/:me' }, function(req, res, next) 
     uri: req.params.uri
   };
   items[item.id] = item;
-  res.send(201, item);
+  res.send(201, decorateItemWithMediaLinks(item));
+  next();
 });
 
 server.del({ name: 'items.delete', path: '/items/:id' }, function(req, res, next) {
   if (!items[req.params.id]) return res.send(404);
   delete items[req.params.id];
   res.send(200);
+  next();
+});
+
+server.get({ name: 'items.get', path: '/items/:id' }, function(req, res, next) {
+  if (!items[req.params.id]) return res.send(404);
+  var item = items[req.params.id];
+  res.send(200, decorateItemWithMediaLinks(item));
+  next();
 });
 
 server.listen(process.env.PORT || 3020, function() {
