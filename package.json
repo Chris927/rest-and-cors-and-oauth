@@ -1,0 +1,17 @@
+{
+  "name": "restify-history-service",
+  "version": "0.0.0",
+  "description": "experimental service (api only)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "restify",
+    "experiment",
+    "api",
+    "rest"
+  ],
+  "author": "chris@uber5.com",
+  "license": "ISC"
+}
