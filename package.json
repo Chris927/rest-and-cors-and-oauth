@@ -15,6 +15,7 @@
   "author": "chris@uber5.com",
   "license": "ISC",
   "dependencies": {
-    "restify": "~2.8.2"
+    "restify": "~2.8.2",
+    "restify-validator": "~0.3.1"
   }
 }
