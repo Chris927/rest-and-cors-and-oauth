@@ -5,6 +5,10 @@ var util = require('util'),
 var server = restify.createServer();
 server.use(restify.bodyParser());
 server.use(restifyValidator);
+server.use(function(req, res, next) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  next();
+});
 
 var items = {};
 var lastId = 0;
