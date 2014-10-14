@@ -28,21 +28,12 @@ passport.use(new BearerStrategy({
 restify.CORS.ALLOW_HEADERS.push('authorization');
 
 var server = restify.createServer();
-server.pre(function(req, res, next) {
-  console.log('req.path', req.path());
-  console.log('req.headers', req.headers);
-  next();
-});
 server.use(restify.CORS());
 server.use(restify.fullResponse());
 server.use(restify.bodyParser());
 server.use(restifyValidator);
 server.use(passport.initialize());
 server.use(passport.authenticate('bearer', { session: false })); // ensures all routes are protected
-/* server.use(function(req, res, next) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  next();
-}); */
 
 var items = {};
 var lastId = 0;
