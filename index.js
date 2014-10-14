@@ -1,27 +1,31 @@
 var util = require('util'),
     restify = require('restify'),
     passport = require('passport'),
+    OAuth2 = require('oauth').OAuth2,
     BearerStrategy = require('passport-http-bearer').Strategy,
     restifyValidator = require('restify-validator'),
     request = require('request');
 
+var clientId = '9d269857-1f26-4e5e-acf4-2f49d5f826d1';
+var clientSecret = 'AONhdiI0UUPNW97NdPVJnxu9C5-QcXvPRaEKRWh1ljL0uQlkBAxxiiAxFDgodqHq68K2-VwMwOjM0j-vMGLN7Og';
+var baseSite = 'http://localhost:8080/my-openid-connect-server';
+var authorizePath = '/authorize';
+var accessTokenPath = '/token';
+var oauth2 = new OAuth2(clientId, clientSecret, baseSite, authorizePath, accessTokenPath);
+
 passport.use(new BearerStrategy({
 }, function(token, done) {
   console.log('token', token);
-  request({
-    url: 'http://localhost:8080/my-openid-connect-server/api/tokens/access', // TODO: hardcoded
-    headers: {
-      'Authorization': 'Bearer ' + token
-    }
-  }, function(err, res, body) {
+  function isUnauthorized(err) {
+    return err && err.data && JSON.parse(err.data).error === 'invalid_grant';
+  }
+  //oauth2.getOAuthAccessToken(token, { grant_type: 'authorization_code' }, function(err, token, refreshToken, results) {
+  oauth2.get(baseSite + '/userinfo', token, function(err, data, res) {
+    if (isUnauthorized(err)) return done(null, false);
     if (err) return done(err);
-    var tokens = JSON.parse(body);
-    console.log('res.statusCode', res.statusCode);
-    if (res.statusCode == 401) return done(new Error('not authorized: ' + tokens.error));
-    if (res.statusCode >= 300) return done(new Error('unknown / unexpected result: ' + body));
-    console.log('tokens', tokens);
-    if (!tokens[0] || !tokens[0].userId) return done(new Error('missing userId in (first) token'));
-    done(null, { id: tokens[0].userId });
+    var userinfo = JSON.parse(data);
+    console.log('userinfo', userinfo);
+    done(null, userinfo.sub);
   });
 }));
 
