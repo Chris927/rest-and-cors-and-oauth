@@ -50,7 +50,8 @@ function decorateItemWithMediaLinks(item) {
     uri: item.uri,
     links: {
       'delete': server.router.render('items.delete', { id: item.id }),
-      'get': server.router.render('items.get', { id: item.id })
+      'get': server.router.render('items.get', { id: item.id }),
+      'update': server.router.render('items.update', { id: item.id })
     }
   };
 }
@@ -85,6 +86,19 @@ server.post({ name: 'items.add', path: '/items' }, function(req, res, next) {
   };
   items[item.id] = item;
   res.send(201, decorateItemWithMediaLinks(item));
+  next();
+});
+
+server.post({ name: 'items.update', path: '/items/:id' }, function(req, res, next) {
+  var item = items[req.params.id];
+  if (!item || item.who != req.user) return res.send(404);
+  console.log('req.params', req.params);
+  [ 'title', 'uri' ].forEach(function(key) {
+    if (req.params[key]) {
+      item[key] = req.params[key];
+    }
+  });
+  res.send(200, decorateItemWithMediaLinks(item));
   next();
 });
 

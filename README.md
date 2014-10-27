@@ -36,6 +36,12 @@ curl -d 'title=bla\&uri=http://test.com' http://localhost:3020/items
 curl http://localhost:3020/items
 ```
 
+- update title of item 42
+
+```
+curl -X POST -d 'title=Changed%20Title' http://localhost:3020/items/42
+```
+
 - delete item with id 42
 
 ```
