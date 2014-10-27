@@ -19,7 +19,6 @@ passport.use(new BearerStrategy({
   function isUnauthorized(err) {
     return err && err.data && JSON.parse(err.data).error === 'invalid_grant';
   }
-  //oauth2.getOAuthAccessToken(token, { grant_type: 'authorization_code' }, function(err, token, refreshToken, results) {
   oauth2.get(baseSite + '/userinfo', token, function(err, data, res) {
     if (isUnauthorized(err)) return done(null, false);
     if (err) return done(err);
@@ -54,12 +53,13 @@ function decorateItemWithMediaLinks(item) {
   };
 }
 
-server.get({ name: 'items', path: '/history' }, function(req, res, next) {
+server.get({ name: 'items', path: '/items' }, function(req, res, next) {
   var user = req.user;
+  console.log('user', user);
   var itemsAsArray = [];
   for (var i in items) {
     var item = items[i];
-    if (item.who == user.id) itemsAsArray.push(decorateItemWithMediaLinks(item));
+    if (item.who == user) itemsAsArray.push(decorateItemWithMediaLinks(item));
   }
   res.send({
     items: itemsAsArray,
@@ -77,7 +77,7 @@ server.post({ name: 'items.add', path: '/items' }, function(req, res, next) {
   if (errors) return res.send(422, util.inspect(errors));
   var item = {
     id: ++lastId,
-    who: req.user.id,
+    who: req.user,
     title: req.params.title,
     uri: req.params.uri
   };
@@ -87,14 +87,14 @@ server.post({ name: 'items.add', path: '/items' }, function(req, res, next) {
 });
 
 server.del({ name: 'items.delete', path: '/items/:id' }, function(req, res, next) {
-  if (!items[req.params.id] || items[req.params.id].who != req.user.id) return res.send(404);
+  if (!items[req.params.id] || items[req.params.id].who != req.user) return res.send(404);
   delete items[req.params.id];
   res.send(200);
   next();
 });
 
 server.get({ name: 'items.get', path: '/items/:id' }, function(req, res, next) {
-  if (!items[req.params.id] || items[req.params.id].who != req.user.id) return res.send(404);
+  if (!items[req.params.id] || items[req.params.id].who != req.user) return res.send(404);
   var item = items[req.params.id];
   res.send(200, decorateItemWithMediaLinks(item));
   next();
