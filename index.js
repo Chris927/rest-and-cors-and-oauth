@@ -35,8 +35,10 @@ server.use(restify.CORS());
 server.use(restify.fullResponse());
 server.use(restify.bodyParser());
 server.use(restifyValidator);
-server.use(passport.initialize());
-server.use(passport.authenticate('bearer', { session: false })); // ensures all routes are protected
+if (!process.env.SKIP_AUTH) {
+  server.use(passport.initialize());
+  server.use(passport.authenticate('bearer', { session: false })); // ensures all routes are protected
+}
 
 var items = {};
 var lastId = 0;
